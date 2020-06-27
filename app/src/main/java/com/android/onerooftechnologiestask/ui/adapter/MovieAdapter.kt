@@ -9,8 +9,6 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.android.onerooftechnologiestask.R
 import com.android.onerooftechnologiestask.model.Result
 import com.android.onerooftechnologiestask.ui.activity.MainActivity.Companion.getMeasuredPosterHeight
@@ -49,7 +47,7 @@ class MovieAdapter(
 
         var mMovieTitle: TextView? = null
         var mMoviePoster: ImageView? = null
-        var mMovieCard: LinearLayout? = null
+        var mMovieCard: CardView? = null
 
         init {
             mMoviePoster=itemView!!.findViewById(R.id.iv_movie_poster)

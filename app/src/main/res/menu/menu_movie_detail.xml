@@ -3,8 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.android.onerooftechnologiestask.ui.activity.MovieDetailActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/sort_by_popularity"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Popular Movies"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sort_by_top"
+        android:orderInCategory="100"
+        android:title="Top Rated Movies"
         app:showAsAction="never" />
 </menu>

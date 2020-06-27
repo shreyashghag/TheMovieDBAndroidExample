@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.android.onerooftechnologiestask.R
 import com.android.onerooftechnologiestask.model.Result
 import com.android.onerooftechnologiestask.ui.activity.MainActivity.Companion.movieImagePathBuilder
@@ -17,19 +15,14 @@ import com.squareup.picasso.Picasso
 
 class MovieDetailActivity : AppCompatActivity() {
 
-    @BindView(R.id.movie_activity_title)
     var mMovieTitle: TextView? = null
 
-    @BindView(R.id.movie_activity_poster)
     var mMoviePoster: ImageView? = null
 
-    @BindView(R.id.movie_activity_rating)
     var mMovieRating: TextView? = null
 
-    @BindView(R.id.movie_activity_synopsis)
     var mMovieSynopsis: TextView? = null
 
-    @BindView(R.id.movie_activity_release_date)
     var mMovieReleaseDate: TextView? = null
 
     private var mMovie: Result? = null

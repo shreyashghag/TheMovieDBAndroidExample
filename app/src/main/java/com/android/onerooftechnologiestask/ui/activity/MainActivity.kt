@@ -3,7 +3,14 @@ package com.android.onerooftechnologiestask.ui.activity
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -28,7 +35,6 @@ class MainActivity : AppCompatActivity() {
 
     private val FIRST_PAGE = 1
     private var totalPages = 0
-    private val currentSortMode = 1
     private var call: Call<Movie>? = null
     private var movieResults: ArrayList<Result>? = null
     private var movieAdapter: MovieAdapter? = null
@@ -36,11 +42,13 @@ class MainActivity : AppCompatActivity() {
 
 
     var recyclerView: RecyclerView? = null
+    var searchView:EditText?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         recyclerView=findViewById(R.id.rv_movies)
+        searchView=findViewById(R.id.searchView)
         setupListeners()
 
     }
@@ -60,24 +68,27 @@ class MainActivity : AppCompatActivity() {
                     totalItemsCount: Int,
                     view: RecyclerView?
                 ) {
-                    if (page + 1 <= totalPages && currentSortMode != 3) {
-                        loadPage(page + 1)
+                    if (page + 1 <= totalPages ) {
+                        loadPage(page + 1,1)
                     }
                 }
             }
 
         recyclerView!!.addOnScrollListener(scrollListener)
         if(ConnectionDetector.isConnected(this)){
-            loadPage(FIRST_PAGE)
+            loadPage(FIRST_PAGE,1)
         }else{
             Toast.makeText(this,"no Internet Connection",Toast.LENGTH_SHORT).show()
         }
     }
 
 
-    fun loadPage(page:Int) {
+    fun loadPage(page:Int,cucurrentSortMode:Int) {
         val movieDataService = RetrofitInstance.getRetrofitInstance()!!.create(GetMovieDataService::class.java) as GetMovieDataService
-            call = movieDataService.getPopularMovies(page, API_KEY);
+        when (cucurrentSortMode) {
+            1 -> call = movieDataService.getPopularMovies(page, API_KEY)
+            2 -> call = movieDataService.getTopRatedMovies(page, API_KEY)
+        }
         call!!.enqueue(object : Callback<Movie?> {
             override fun onResponse(
                 call: Call<Movie?>,
@@ -86,6 +97,8 @@ class MainActivity : AppCompatActivity() {
                 if (page === 1) {
                     movieResults = response.body()!!.results
                     totalPages = response.body()!!.total_pages
+                    Log.d("pages",response.body()!!.total_pages.toString())
+                    Log.d("result",response.body()!!.results.toString())
                     movieAdapter = MovieAdapter(movieResults!!, object : MovieClickListener {
 
                         override fun onMovieClick(movie: Result?) {
@@ -116,6 +129,23 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //SortID 1 -> Popularity
+        //SortID 2 -> Top rated
+        when (item.getItemId()) {
+            R.id.sort_by_popularity -> loadPage(1,1)
+            R.id.sort_by_top -> loadPage(1,2)
+
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu_movie_detail, menu)
+        return true
+    }
 
         companion object {
             fun getScreenWidth(): Int {
