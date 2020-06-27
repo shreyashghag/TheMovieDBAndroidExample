@@ -11,6 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -43,12 +44,14 @@ class MainActivity : AppCompatActivity() {
 
     var recyclerView: RecyclerView? = null
     var searchView:EditText?=null
+    var progressBar:ProgressBar?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         recyclerView=findViewById(R.id.rv_movies)
         searchView=findViewById(R.id.searchView)
+        progressBar=findViewById(R.id.progress_circular)
         setupListeners()
 
     }
@@ -69,6 +72,7 @@ class MainActivity : AppCompatActivity() {
                     view: RecyclerView?
                 ) {
                     if (page + 1 <= totalPages ) {
+                        progressBar!!.visibility=View.VISIBLE
                         loadPage(page + 1,1)
                     }
                 }
@@ -80,6 +84,64 @@ class MainActivity : AppCompatActivity() {
         }else{
             Toast.makeText(this,"no Internet Connection",Toast.LENGTH_SHORT).show()
         }
+        searchView!!.setOnKeyListener(object : View.OnKeyListener {
+            override fun onKey(p0: View?, p1: Int, keyEvent: KeyEvent?): Boolean {
+                if (keyEvent?.action == KeyEvent.ACTION_DOWN && p1 == KeyEvent.KEYCODE_ENTER) {
+                    val text = searchView!!.text.toString().toLowerCase().trim()
+                    Log.d("search", "called: $text")
+                    if (text.isEmpty() || text.isBlank()) {
+
+                    } else {
+                        val movieDataService = RetrofitInstance.getRetrofitInstance()!!.create(GetMovieDataService::class.java) as GetMovieDataService
+                        call = movieDataService.getSearchedMovies(text.toString(),API_KEY,FIRST_PAGE)
+                        call!!.enqueue(object : Callback<Movie?> {
+                            override fun onResponse(
+                                call: Call<Movie?>,
+                                response: Response<Movie?>
+                            ) {
+                                if (FIRST_PAGE === 1) {
+                                    Log.d("response",response.toString())
+                                    Log.d("pages",response.body()!!.total_pages.toString())
+                                    Log.d("result",response.body()!!.results.toString())
+                                    movieResults = response.body()!!.results
+                                    totalPages = response.body()!!.total_pages
+                                    movieAdapter = MovieAdapter(movieResults!!, object : MovieClickListener {
+
+                                        override fun onMovieClick(movie: Result?) {
+                                            val intent =
+                                                Intent(this@MainActivity, MovieDetailActivity::class.java)
+                                            val bundle = Bundle()
+                                            bundle.putParcelable("movie", movie)
+                                            intent.putExtras(bundle)
+                                            startActivity(intent)
+                                        }
+                                    })
+                                    recyclerView!!.adapter = movieAdapter
+                                } else {
+                                    progressBar!!.visibility=View.GONE
+                                    assert(response.body() != null)
+                                    val movies: List<Result> = response.body()!!.results
+                                    for (movie in movies) {
+                                        movieResults!!.add(movie)
+                                        movieAdapter!!.notifyItemInserted(movieResults!!.size - 1)
+                                    }
+                                }
+                            }
+
+                            override fun onFailure(call: Call<Movie?>, t: Throwable) {
+                                Log.d("error",t.message)
+                                Log.d("error",call.toString())
+                                progressBar!!.visibility=View.GONE
+                                Toast.makeText(applicationContext,"some error occured",Toast.LENGTH_SHORT).show()
+                            }
+                        })
+                    }
+                    return true
+                } else {
+                    return false
+                }
+            }
+        })
     }
 
 
@@ -112,6 +174,7 @@ class MainActivity : AppCompatActivity() {
                     })
                     recyclerView!!.adapter = movieAdapter
                 } else {
+                    progressBar!!.visibility=View.GONE
                     assert(response.body() != null)
                     val movies: List<Result> = response.body()!!.results
                     for (movie in movies) {
@@ -123,6 +186,8 @@ class MainActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<Movie?>, t: Throwable) {
                 Log.d("error",t.message)
+                Log.d("error",call.toString())
+                progressBar!!.visibility=View.GONE
                Toast.makeText(applicationContext,"some error occured",Toast.LENGTH_SHORT).show()
             }
           })
@@ -131,12 +196,9 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        //SortID 1 -> Popularity
-        //SortID 2 -> Top rated
         when (item.getItemId()) {
             R.id.sort_by_popularity -> loadPage(1,1)
             R.id.sort_by_top -> loadPage(1,2)
-
         }
         return super.onOptionsItemSelected(item)
     }
@@ -148,13 +210,6 @@ class MainActivity : AppCompatActivity() {
     }
 
         companion object {
-            fun getScreenWidth(): Int {
-                return Resources.getSystem().getDisplayMetrics().widthPixels
-            }
-
-            fun getMeasuredPosterHeight(width: Int): Int {
-                return (width * 1.5f).toInt()
-            }
             fun movieImagePathBuilder(imagePath: String): String? {
                 return "https://image.tmdb.org/t/p/" +
                         "w500" +

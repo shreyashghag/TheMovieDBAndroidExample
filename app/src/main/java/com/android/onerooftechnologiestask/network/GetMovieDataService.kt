@@ -19,10 +19,10 @@ interface GetMovieDataService {
         @Query("api_key") userkey: String?
     ): Call<Movie>
 
-    @GET("/search/movie")
+    @GET("search/movie")
     fun getSearchedMovies(
-        @Query("page") page: Int,
+        @Query("query") query: String,
         @Query("api_key") userkey: String?,
-        @Query("query") query: String
+        @Query("page") page: Int
     ): Call<Movie>
 }

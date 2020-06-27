@@ -11,8 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.android.onerooftechnologiestask.R
 import com.android.onerooftechnologiestask.model.Result
-import com.android.onerooftechnologiestask.ui.activity.MainActivity.Companion.getMeasuredPosterHeight
-import com.android.onerooftechnologiestask.ui.activity.MainActivity.Companion.getScreenWidth
 import com.android.onerooftechnologiestask.ui.activity.MainActivity.Companion.movieImagePathBuilder
 import com.squareup.picasso.Picasso
 
@@ -55,11 +53,9 @@ class MovieAdapter(
             mMovieTitle=itemView!!.findViewById(R.id.movie_title)
         }
         fun bind(movie: Result, movieClickListener: MovieClickListener) {
-            mMovieCard!!.setLayoutParams( ViewGroup.LayoutParams(getScreenWidth()/2, getMeasuredPosterHeight(getScreenWidth()/2)));
-            mMovieTitle!!.setText(movie.original_title)
+            mMovieTitle!!.setText(movie.title)
             Picasso.with(mMoviePoster!!.getContext())
-                .load(movieImagePathBuilder(movie.poster_path))
-                .placeholder(R.drawable.ic_launcher_background).fit().centerCrop().into(mMoviePoster)
+                .load(movieImagePathBuilder(movie.poster_path)).error(R.drawable.ic_launcher_background).placeholder(R.drawable.ic_launcher_background).into(mMoviePoster)
             itemView.setOnClickListener{
                     movieClickListener.onMovieClick(movie)
 

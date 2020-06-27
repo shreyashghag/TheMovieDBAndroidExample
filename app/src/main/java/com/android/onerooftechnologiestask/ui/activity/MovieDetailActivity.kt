@@ -38,7 +38,7 @@ class MovieDetailActivity : AppCompatActivity() {
         val intent = intent
         val bundle = intent.extras
         mMovie = bundle!!.getParcelable<Result>("movie")
-        Picasso.with(this).load(movieImagePathBuilder(mMovie!!.poster_path)).into(mMoviePoster)
+        Picasso.with(this).load(movieImagePathBuilder(mMovie!!.poster_path!!)).placeholder(R.drawable.ic_launcher_background).into(mMoviePoster)
         mMovieTitle!!.text = mMovie!!.title
         title=mMovie!!.title
         mMovieSynopsis!!.setText(mMovie!!.overview)
