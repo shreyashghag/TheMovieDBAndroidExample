@@ -13,6 +13,8 @@
         android:layout_margin="10dp"
         android:hint="Search"
         android:maxLines="1"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
         app:layout_constraintBottom_toTopOf="@+id/rv_movies"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
